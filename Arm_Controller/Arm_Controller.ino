@@ -79,7 +79,7 @@ double setpoint = 0;
 double Input; // input is form IMU
 double Output; // output is going to the ESC
 
-double Kp=3, Ki=5, Kd=.12; //2,12
+double Kp=0, Ki=0, Kd=0; //5,5,.12
 PID motor_PID(&Input, &Output, &setpoint, Kp, Ki, Kd, DIRECT); // set the characteristics of the controller
 
 char command = '\0'; // null value for default command
@@ -315,8 +315,7 @@ void loop() {
     //Serial.print("PID OUTPU------------  ");
     //Serial.print(Output);
     ESC.write(Output);
-    Serial.println(Output);
-    //delay(15);
+    //Serial.println(Output);
     }    
   }
 }
@@ -325,6 +324,28 @@ void loop() {
 //                     Functions Declarations           
 // ================================================================
 void get_PIDs(void) {
+  /* Command Line Format
+   *  P value\n
+   *  I value\n
+   *  D value\n
+  */
+
+  String input_string = "\0";
+  char input_char = '\0';
+
+  while (Serial.available()) {
+    delay(3); // allow the input buffer to fill
+
+    if (Serial.available() > 0) {
+      input_char = (char)Serial.read(); // gets one byte from serial buffer
+      input_string += input_char;
+    }
+  }
+
+  if (input_string.length() == 4) {
+    //input_string = input_string.substring(
+    Serial.println(input_string);
+  }
   
 }
 
