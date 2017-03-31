@@ -1,4 +1,9 @@
 /*
+ * Organization   : Boston University UAV Team
+ * Authors        : Nick Brisco, Connor McCann
+ * Event          : Control Theory Event
+ * Date           : 31 Mar 2017
+ * 
  * This code will supprt the testing rig we built for the control 
  * theory event helod on 32 Mar 2017 with Kenneth Sebesta.
  * 
@@ -8,10 +13,10 @@
  * to the table. 
  * 
  * Each team should be able to use the data from the onboard IMU to set the angle 
- * of the arm to be +- 30 deg from level using an arduino and the required sensors
+ * of the arm to be +- ~30 deg from level using an arduino and the required sensors
  * 
  * Equipment: 
- *  - Test Rig
+ *  - Test Rig (Designed by Andrew Lee)
  *  - DC motor
  *  - ESC
  *  - IMU
@@ -20,57 +25,60 @@
  */
 #include <PID_v1.h>
 #include <Servo.h>
-#include <Wire.h>
+#include "I2Cdev.h"
+#include "MPU6050_6Axis_MotionApps20.h"
 
 #define PID_INPUT   0   // read the value from the IMU 
 #define PID_OUTPUT  3   // set the value form the ESC
 #define ESC_PIN     10  // Where the ESC is connected (PWM)
 
 
-Servo ESC;  // Create the ESC Servo
+Servo ESC; // Create the ESC Servo
  
 double setpoint;
-double Input;   // input is form IMU
-double Output;  // output is going to the ESC
+double Input; // input is form IMU
+double Output; // output is going to the ESC
 
 double Kp=1, Ki=0 , Kd=0;
 PID motor_PID(&Input, &Output, &setpoint, Kp, Ki, Kd, DIRECT); // set the characteristics of the controller
 
+char command = '\0'; // null value for default command
+
+//==========================================================================
+//                            SETUP LOOP
+//==========================================================================
 void setup() {
+  Serial.begin(9600); // Serial command line interface
+  ESC.attach(ESC_PIN); // Setting up the ESC
+  setpoint; // set this for the angle you want
+  motor_PID.SetMode(AUTOMATIC); //turn the PID on
 
-  // Serial command line interface
-  Serial.begin(9600);
-  
-  // Setting up the ESC
-  ESC.attach(ESC_PIN);
-  
-  // Setting up the PID Controller
-  setpoint;   // set this for the angle you want
-
-  //turn the PID on
-  motor_PID.SetMode(AUTOMATIC);
- 
+  Serial.println("Please enter CAPITAL R to run");
 }
 
+//==========================================================================
+//                             MAIN LOOP
+//==========================================================================
 void loop() {
+  // handle the user command line interface
+  while (command != 'R') {
+    if (Serial.available())
+    {
+      command = Serial.read();
+      if (command != 'R') {
+        Serial.println("Wrong Command...Try Again");
+      }
+      else {
+        Serial.println("Will Start in 3 Seconds");
+        delay(3000);
+        Serial.println("Lift Off!");
+      }
+    }
+  }
 
-  // Get the setpoint value from user input
-  if (Serial.available() > 0) {
-    // read the incoming byte:
-    setpoint = Serial.read();
-  
-    // say what you got:
-    Serial.print("I received: ");
-    Serial.println(setpoint, DEC);
-  }
-  else {
-    setpoint = 0; // default value
-  }
-  
-  // Execute PID Controller
-  motor_PID.Compute();
+  setpoint = 0; // we received a run command so set the setpoint to level
+  motor_PID.Compute(); // Execute PID Controller
   ESC.write(Output);
   delay(15);
-
 }
 
