@@ -69,20 +69,19 @@ void dmpDataReady() {
     mpuInterrupt = true;
 }
 
-
-
+// Servo--------------------------------------------------------
 Servo ESC; // Create the ESC Servo
 MPU6050 mpu;
  
-double setpoint;
+double setpoint = 0;
 double Input; // input is form IMU
 double Output; // output is going to the ESC
 
-double Kp=1, Ki=0 , Kd=0;
+double Kp=15, Ki=2, Kd=12;
 PID motor_PID(&Input, &Output, &setpoint, Kp, Ki, Kd, DIRECT); // set the characteristics of the controller
 
 char command = '\0'; // null value for default command
-
+double oldTime;
 //==========================================================================
 //                            SETUP LOOP
 //==========================================================================
@@ -159,7 +158,7 @@ void setup() {
   //delay(3000);
   setpoint; // set this for the angle you want
   motor_PID.SetMode(AUTOMATIC); //turn the PID on
-
+  motor_PID.SetOutputLimits(1100,1400);
   Serial.println("Please enter CAPITAL R to run");
 }
 
@@ -182,6 +181,15 @@ void loop() {
       }
       }
     }
+
+  // TEST TO KILL
+  if (Serial.available()) {
+    if (Serial.read() == 'k') {
+      while (1) {
+        
+      }
+    }
+  }
 
   if (TESTING) {
     ESC.writeMicroseconds(1200);
@@ -236,26 +244,26 @@ void loop() {
       #ifdef OUTPUT_READABLE_QUATERNION
           // display quaternion values in easy matrix form: w x y z
           mpu.dmpGetQuaternion(&q, fifoBuffer);
-          Serial.print("quat\t");
-          Serial.print(q.w);
-          Serial.print("\t");
-          Serial.print(q.x);
-          Serial.print("\t");
-          Serial.print(q.y);
-          Serial.print("\t");
-          Serial.println(q.z);
+//          Serial.print("quat\t");
+//          Serial.print(q.w);
+//          Serial.print("\t");
+//          Serial.print(q.x);
+//          Serial.print("\t");
+//          Serial.print(q.y);
+//          Serial.print("\t");
+//          Serial.println(q.z);
       #endif
   
       #ifdef OUTPUT_READABLE_EULER
           // display Euler angles in degrees
           mpu.dmpGetQuaternion(&q, fifoBuffer);
           mpu.dmpGetEuler(euler, &q);
-          Serial.print("euler\t");
-          Serial.print(euler[0] * 180/M_PI);
-          Serial.print("\t");
-          Serial.print(euler[1] * 180/M_PI);
-          Serial.print("\t");
-          Serial.println(euler[2] * 180/M_PI);
+//          Serial.print("euler\t");
+//          Serial.print(euler[0] * 180/M_PI);
+//          Serial.print("\t");
+//          Serial.print(euler[1] * 180/M_PI);
+//          Serial.print("\t");
+//          Serial.println(euler[2] * 180/M_PI);
       #endif
   
       #ifdef OUTPUT_READABLE_YAWPITCHROLL
@@ -263,12 +271,14 @@ void loop() {
           mpu.dmpGetQuaternion(&q, fifoBuffer);
           mpu.dmpGetGravity(&gravity, &q);
           mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-          Serial.print("ypr\t");
-          Serial.print(ypr[0] * 180/M_PI);
-          Serial.print("\t");
-          Serial.print(ypr[1] * 180/M_PI);
-          Serial.print("\t");
-          Serial.println(ypr[2] * 180/M_PI);
+//          Serial.print("ypr\t");
+//          Serial.print(ypr[0] * 180/M_PI);
+//          Serial.print("\t");
+//          Serial.print(ypr[1] * 180/M_PI);
+//          Serial.print("\t");
+//          Serial.println(ypr[2] * 180/M_PI);
+          Input = ypr[2] * 180/M_PI;
+          
       #endif
   
       #ifdef OUTPUT_READABLE_REALACCEL
@@ -277,12 +287,12 @@ void loop() {
           mpu.dmpGetAccel(&aa, fifoBuffer);
           mpu.dmpGetGravity(&gravity, &q);
           mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
-          Serial.print("areal\t");
-          Serial.print(aaReal.x);
-          Serial.print("\t");
-          Serial.print(aaReal.y);
-          Serial.print("\t");
-          Serial.println(aaReal.z);
+//          Serial.print("areal\t");
+//          Serial.print(aaReal.x);
+//          Serial.print("\t");
+//          Serial.print(aaReal.y);
+//          Serial.print("\t");
+//          Serial.println(aaReal.z);
       #endif
   
       #ifdef OUTPUT_READABLE_WORLDACCEL
@@ -293,12 +303,12 @@ void loop() {
           mpu.dmpGetGravity(&gravity, &q);
           mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
           mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
-          Serial.print("aworld\t");
-          Serial.print(aaWorld.x);
-          Serial.print("\t");
-          Serial.print(aaWorld.y);
-          Serial.print("\t");
-          Serial.println(aaWorld.z);
+//          Serial.print("aworld\t");
+//          Serial.print(aaWorld.x);
+//          Serial.print("\t");
+//          Serial.print(aaWorld.y);
+//          Serial.print("\t");
+//          Serial.println(aaWorld.z);
       #endif
   
       #ifdef OUTPUT_TEAPOT
@@ -318,12 +328,11 @@ void loop() {
 
     
     // Everything Else------------------------------------------------------------------
-    /*
-    setpoint = 0; // we received a run command so set the setpoint to level
     motor_PID.Compute(); // Execute PID Controller
+    //Serial.print("PID OUTPU------------  ");
+    //Serial.print(Output);
     ESC.write(Output);
-    delay(15);
-    */
+    //delay(15);
   }
 }
 
