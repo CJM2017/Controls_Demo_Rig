@@ -22,32 +22,38 @@
 #include <Servo.h>
 #include <Wire.h>
 
+#define PID_INPUT   0   // read the value from the IMU 
+#define PID_OUTPUT  3   // set the value form the ESC
+#define ESC_PIN     10  // Where the ESC is connected
 
-#define PID_INPUT 0
-#define PID_OUTPUT 3
 
-//Define Variables we'll be connecting to
-double Setpoint, Input, Output;
+Servo ESC;  // Create the ESC Servo
+ 
+double Setpoint;
+double Input, Output; // input is form IMU & output is going to the ESC
 
-//Specify the links and initial tuning parameters
 double Kp=1, Ki=0, Kd=0;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+PID motor_PID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT); // set the characteristics of the controller
 
 void setup() {
 
+  // Setting up the ESC
+  ESC.attach(ESC_PIN);
+  
   // Setting up the PID Controller
-  Input; //get this from 
-  Setpoint = 100;
+  Setpoint;   // set this for the angle you want
 
   //turn the PID on
-  myPID.SetMode(AUTOMATIC);
+  motor_PID.SetMode(AUTOMATIC);
  
 }
 
 void loop() {
 
-  // PID Controller
-  myPID.Compute();
+  // Execute PID Controller
+  motor_PID.Compute();
+  ESC.write(Output);
+  delay(15);
 
 }
 
