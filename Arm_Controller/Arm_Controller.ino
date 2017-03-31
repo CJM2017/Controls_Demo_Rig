@@ -82,7 +82,7 @@ void loop() {
     }
 
   if (TESTING) {
-    ESC.writeMicroseconds(1500);
+    ESC.writeMicroseconds(1200);
     Serial.println("Testing ESC...");
     delay(100);
   }
