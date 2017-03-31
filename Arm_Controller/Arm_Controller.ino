@@ -172,10 +172,12 @@ void setup() {
   Serial.println("           Your Commands:");
   Serial.println("======================================");
   Serial.println("r: to run");
-  Serial.println("k: to stop");
+  Serial.println("q: to stop");
+  Serial.println("s <value>: set the P-term");
   Serial.println("k <value>: set the P-term");
   Serial.println("i <value>: set the I-term");
   Serial.println("d <value>: set the D-term");
+  Serial.println("--------------------------------------");
 }
 
 //==========================================================================
@@ -346,7 +348,7 @@ void get_PIDs(void) {
   String coef = "\0";
   int space = 0;
   int newLine = 0;
-  int value = 0;
+  float value = 0;
 
   // Get the command line date from the user input
   while (Serial.available()) {
@@ -363,14 +365,16 @@ void get_PIDs(void) {
     
     coef = input_string.substring(0,1);
     
-    if (coef.equals("k")) {
+    if (coef.equals("q")) {
       Serial.println("turning off the motor");
       // turn off esc
       program_run = 0;
+      ESC.writeMicroseconds(1000);
     }
     else if (coef.equals("r")) {
       program_run = 1;
       Serial.println("Starting Motor");
+      ESC.writeMicroseconds(1100);
     }
 
     // otherwise determine what commands we received
@@ -379,7 +383,11 @@ void get_PIDs(void) {
     value = input_string.substring(space,newLine).toFloat(); // 0 if nothing is passed to it
 
     // Set the correct coefficient
-    if (coef.equals("p")) {
+    if (coef.equals("s")) {
+      setpoint = (double)value;
+      Serial.print("Setpoint: "); Serial.println(value);
+    }
+    else if (coef.equals("p")) {
       Kp = value;
       Serial.print("Kp: "); Serial.println(value);
     }
