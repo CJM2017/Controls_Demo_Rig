@@ -79,7 +79,7 @@ double setpoint = 0;
 double Input; // input is form IMU
 double Output; // output is going to the ESC
 
-double Kp=0, Ki=1, Kd=0; //2,12
+double Kp=1.5, Ki=5, Kd=.12; //2,12
 PID motor_PID(&Input, &Output, &setpoint, Kp, Ki, Kd, DIRECT); // set the characteristics of the controller
 
 char command = '\0'; // null value for default command
