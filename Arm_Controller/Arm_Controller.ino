@@ -38,7 +38,7 @@
 #define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
 
 //==========================================================================
-//                            MPU6050
+//                          MPU6050 Global Vars
 //==========================================================================
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
@@ -57,24 +57,24 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
-double oldTime;
-
 // packet structure for InvenSense teapot demo
 uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
 
-// ================================================================
-// ===               INTERRUPT DETECTION ROUTINE                ===
-// ================================================================
+MPU6050 mpu;
+//==========================================================================
+//                    INTERRUPT DETECTION ROUTINE                
+//==========================================================================
 
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 void dmpDataReady() {
             mpuInterrupt = true;
 }
 
-// Servo--------------------------------------------------------
+//==========================================================================
+//                          Servo / PID           
+//==========================================================================
 Servo ESC; // Create the ESC Servo
-MPU6050 mpu;
- 
+
 double setpoint = 0;
 double Input; // input is form IMU
 double Output; // output is going to the ESC
@@ -83,6 +83,13 @@ double Kp=3, Ki=5, Kd=.12; //2,12
 PID motor_PID(&Input, &Output, &setpoint, Kp, Ki, Kd, DIRECT); // set the characteristics of the controller
 
 char command = '\0'; // null value for default command
+double oldTime;
+
+//==========================================================================
+//                      Forward Declarations          
+//==========================================================================
+void get_PIDs(void);
+
 //==========================================================================
 //                            SETUP LOOP
 //==========================================================================
@@ -168,30 +175,8 @@ void setup() {
 //==========================================================================
 void loop() {
 
-  // Command line safety
-  while (command != 'R') {
-    if (Serial.available()) {
-      command = Serial.read();
-      if (command != 'R') {
-        Serial.println("Wrong Command...Try Again");
-      }
-      else {
-        Serial.println("Will Start in 3 Seconds");
-        delay(3000);
-        Serial.println("Lift Off!");
-      }
-      }
-    }
-
-  // TEST TO KILL
-  if (Serial.available()) {
-    if (Serial.read() == 'k') {
-      while (1) {
-        
-      }
-    }
-  }
-
+  get_PIDs();
+  
   if (TESTING) {
     ESC.writeMicroseconds(1200);
     Serial.println("Testing ESC...");
@@ -332,17 +317,14 @@ void loop() {
     ESC.write(Output);
     Serial.println(Output);
     //delay(15);
-    }
-
-    
-    // Everything Else------------------------------------------------------------------
-//    motor_PID.Compute(); // Execute PID Controller
-//    //Serial.print("PID OUTPU------------  ");
-//    //Serial.print(Output);
-//    ESC.write(Output);
-//    //delay(15);
-
-    
+    }    
   }
+}
+
+// ================================================================
+//                     Functions Declarations           
+// ================================================================
+void get_PIDs(void) {
+  
 }
 
