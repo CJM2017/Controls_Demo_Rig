@@ -165,10 +165,17 @@ void setup() {
   delay(3000);
   //ESC.writeMicroseconds(2000);
   //delay(3000);
-  setpoint; // set this for the angle you want
-  motor_PID.SetMode(AUTOMATIC); //turn the PID on
+  setpoint; 
+  motor_PID.SetMode(AUTOMATIC);
   motor_PID.SetOutputLimits(1100,1600);
-  Serial.println("Please enter CAPITAL R to run");
+  Serial.println("======================================");
+  Serial.println("           Your Commands:");
+  Serial.println("======================================");
+  Serial.println("r: to run");
+  Serial.println("k: to stop");
+  Serial.println("k <value>: set the P-term");
+  Serial.println("i <value>: set the I-term");
+  Serial.println("d <value>: set the D-term");
 }
 
 //==========================================================================
@@ -332,7 +339,6 @@ void get_PIDs(void) {
    *  k - to terminate the program
    *  p value\n
    *  i value\n
-   *  d value\n
   */
 
   String input_string = "\0";
