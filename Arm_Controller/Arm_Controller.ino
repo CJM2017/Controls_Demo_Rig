@@ -22,32 +22,55 @@
 #include <Servo.h>
 #include <Wire.h>
 
+#define PID_INPUT   0   // read the value from the IMU 
+#define PID_OUTPUT  3   // set the value form the ESC
+#define ESC_PIN     10  // Where the ESC is connected (PWM)
 
-#define PID_INPUT 0
-#define PID_OUTPUT 3
 
-//Define Variables we'll be connecting to
-double Setpoint, Input, Output;
+Servo ESC;  // Create the ESC Servo
+ 
+double setpoint;
+double Input;   // input is form IMU
+double Output;  // output is going to the ESC
 
-//Specify the links and initial tuning parameters
-double Kp=1, Ki=0, Kd=0;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+double Kp=1, Ki=0 , Kd=0;
+PID motor_PID(&Input, &Output, &setpoint, Kp, Ki, Kd, DIRECT); // set the characteristics of the controller
 
 void setup() {
 
+  // Serial command line interface
+  Serial.begin(9600);
+  
+  // Setting up the ESC
+  ESC.attach(ESC_PIN);
+  
   // Setting up the PID Controller
-  Input; //get this from 
-  Setpoint = 100;
+  setpoint;   // set this for the angle you want
 
   //turn the PID on
-  myPID.SetMode(AUTOMATIC);
+  motor_PID.SetMode(AUTOMATIC);
  
 }
 
 void loop() {
 
-  // PID Controller
-  myPID.Compute();
+  // Get the setpoint value from user input
+  if (Serial.available() > 0) {
+    // read the incoming byte:
+    setpoint = Serial.read();
+  
+    // say what you got:
+    Serial.print("I received: ");
+    Serial.println(setpoint, DEC);
+  }
+  else {
+    setpoint = 0; // default value
+  }
+  
+  // Execute PID Controller
+  motor_PID.Compute();
+  ESC.write(Output);
+  delay(15);
 
 }
 
