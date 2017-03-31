@@ -20,7 +20,8 @@
  */
 #include <PID_v1.h>
 #include <Servo.h>
-#include <Wire.h>
+#include "I2Cdev.h"
+#include "MPU6050_6Axis_MotionApps20.h"
 
 #define PID_INPUT   0   // read the value from the IMU 
 #define PID_OUTPUT  3   // set the value form the ESC
