@@ -57,6 +57,8 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
+double oldTime;
+
 // packet structure for InvenSense teapot demo
 uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
 
@@ -66,7 +68,7 @@ uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\
 
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 void dmpDataReady() {
-    mpuInterrupt = true;
+            mpuInterrupt = true;
 }
 
 // Servo--------------------------------------------------------
@@ -77,11 +79,10 @@ double setpoint = 0;
 double Input; // input is form IMU
 double Output; // output is going to the ESC
 
-double Kp=15, Ki=2, Kd=12;
+double Kp=0, Ki=1, Kd=0; //2,12
 PID motor_PID(&Input, &Output, &setpoint, Kp, Ki, Kd, DIRECT); // set the characteristics of the controller
 
 char command = '\0'; // null value for default command
-double oldTime;
 //==========================================================================
 //                            SETUP LOOP
 //==========================================================================
@@ -278,7 +279,7 @@ void loop() {
 //          Serial.print("\t");
 //          Serial.println(ypr[2] * 180/M_PI);
           Input = ypr[2] * 180/M_PI;
-          
+         
       #endif
   
       #ifdef OUTPUT_READABLE_REALACCEL
@@ -324,15 +325,24 @@ void loop() {
           Serial.write(teapotPacket, 14);
           teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
       #endif
-    }
 
-    
-    // Everything Else------------------------------------------------------------------
     motor_PID.Compute(); // Execute PID Controller
     //Serial.print("PID OUTPU------------  ");
     //Serial.print(Output);
     ESC.write(Output);
+    Serial.println(Output);
     //delay(15);
+    }
+
+    
+    // Everything Else------------------------------------------------------------------
+//    motor_PID.Compute(); // Execute PID Controller
+//    //Serial.print("PID OUTPU------------  ");
+//    //Serial.print(Output);
+//    ESC.write(Output);
+//    //delay(15);
+
+    
   }
 }
 
