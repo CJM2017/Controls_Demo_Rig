@@ -52,6 +52,8 @@ void setup() {
   ESC.attach(ESC_PIN); // Setting up the ESC
   setpoint; // set this for the angle you want
   motor_PID.SetMode(AUTOMATIC); //turn the PID on
+
+  Serial.println("Please enter CAPITAL R to run");
 }
 
 //==========================================================================
@@ -63,6 +65,14 @@ void loop() {
     if (Serial.available())
     {
       command = Serial.read();
+      if (command != 'R') {
+        Serial.println("Wrong Command...Try Again");
+      }
+      else {
+        Serial.println("Will Start in 3 Seconds");
+        delay(3000);
+        Serial.println("Lift Off!");
+      }
     }
   }
 
