@@ -28,10 +28,9 @@
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 
-#define PID_INPUT   0   // read the value from the IMU 
-#define PID_OUTPUT  3   // set the value form the ESC
+#define IMU_INPUT   0   // read the value from the IMU 
 #define ESC_PIN     10  // Where the ESC is connected (PWM)
-
+#define TESTING     1
 
 Servo ESC; // Create the ESC Servo
  
@@ -50,6 +49,12 @@ char command = '\0'; // null value for default command
 void setup() {
   Serial.begin(9600); // Serial command line interface
   ESC.attach(ESC_PIN); // Setting up the ESC
+  //ESC.writeMicroseconds(2000);
+  //delay(3000);
+  ESC.writeMicroseconds(1000);
+  delay(3000);
+  //ESC.writeMicroseconds(2000);
+  //delay(3000);
   setpoint; // set this for the angle you want
   motor_PID.SetMode(AUTOMATIC); //turn the PID on
 
@@ -60,10 +65,10 @@ void setup() {
 //                             MAIN LOOP
 //==========================================================================
 void loop() {
-  // handle the user command line interface
+
+  // Command line safety
   while (command != 'R') {
-    if (Serial.available())
-    {
+    if (Serial.available()) {
       command = Serial.read();
       if (command != 'R') {
         Serial.println("Wrong Command...Try Again");
@@ -73,12 +78,20 @@ void loop() {
         delay(3000);
         Serial.println("Lift Off!");
       }
+      }
     }
-  }
 
-  setpoint = 0; // we received a run command so set the setpoint to level
-  motor_PID.Compute(); // Execute PID Controller
-  ESC.write(Output);
-  delay(15);
+  if (TESTING) {
+    ESC.writeMicroseconds(1500);
+    Serial.println("Testing ESC...");
+    delay(100);
+  }
+  else {
+    // handle the user command line interface
+    setpoint = 0; // we received a run command so set the setpoint to level
+    motor_PID.Compute(); // Execute PID Controller
+    ESC.write(Output);
+    delay(15);
+  }
 }
 
