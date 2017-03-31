@@ -23,20 +23,20 @@
 #include <Wire.h>
 
 
-#define PIN_INPUT 0
-#define PIN_OUTPUT 3
+#define PID_INPUT 0
+#define PID_OUTPUT 3
 
 //Define Variables we'll be connecting to
 double Setpoint, Input, Output;
 
 //Specify the links and initial tuning parameters
-double Kp=2, Ki=5, Kd=1;
+double Kp=1, Ki=0, Kd=0;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 void setup() {
 
   // Setting up the PID Controller
-  Input = analogRead(PIN_INPUT);
+  Input; //get this from 
   Setpoint = 100;
 
   //turn the PID on
@@ -46,10 +46,8 @@ void setup() {
 
 void loop() {
 
-  //
-  Input = analogRead(PIN_INPUT);
+  // PID Controller
   myPID.Compute();
-  analogWrite(PIN_OUTPUT, Output);
 
 }
 
